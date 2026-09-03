@@ -1,19 +1,19 @@
-# 🧅 OniScan — Onion Layer Detector
+# OniScan — Onion Layer Detector
 
 OniScan is a computer vision-based web application that analyzes an image of a half-cut onion and estimates the number of visible onion layers.
 
 The project uses Python, Flask, OpenCV, and NumPy to process the uploaded image and identify concentric ring patterns.
 
-## ✨ Features
+## Features
 
-- 🧅 Upload a half-cut onion image
-- 🔍 Analyze onion ring patterns
-- 📊 Estimate the number of visible layers
-- 🟢 Display detected layers on the processed image
-- 🌐 Simple web interface
-- ⚡ Runs locally using Flask
+- Upload a half-cut onion image
+- Analyze onion ring patterns
+- Estimate the number of visible layers
+- Display detected layers on the processed image
+- Simple web interface
+- Runs locally using Flask
 
-## 🛠️ Technologies Used
+## Technologies Used
 
 - **Python**
 - **Flask** — Web application framework
@@ -21,7 +21,7 @@ The project uses Python, Flask, OpenCV, and NumPy to process the uploaded image 
 - **NumPy** — Numerical and image-data processing
 - **HTML/CSS** — Frontend interface
 
-## 📁 Project Structure
+## Project Structure
 
 ```text
 OniScan/
@@ -38,3 +38,4 @@ OniScan/
 │   └── uploads/
 │
 └── venv/
+```
