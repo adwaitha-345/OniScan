@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Onion Layer Detector</title>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f1f7;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: auto;
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            font-size: 36px;
+        }
+
+        input {
+            margin: 20px;
+        }
+
+        button {
+            background: #6b3f75;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #4e2d57;
+        }
+
+        .result {
+            margin-top: 30px;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        img {
+            max-width: 100%;
+            margin-top: 20px;
+            border-radius: 10px;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+<div class="container">
+
+    <h1>🧅 Onion Layer Detector</h1>
+
+    <p>
+        Upload a half-cut onion image
+    </p>
+
+
+    <form
+        method="POST"
+        enctype="multipart/form-data"
+    >
+
+        <input
+            type="file"
+            name="image"
+            accept="image/*"
+            required
+        >
+
+        <br>
+
+        <button type="submit">
+            Detect Layers
+        </button>
+
+    </form>
+
+
+    {% if layer_count is not none %}
+
+        <div class="result">
+
+            🧅 Layers Detected:
+            {{ layer_count }}
+
+        </div>
+
+
+        {% if result_image %}
+
+            <img src="{{ result_image }}">
+
+        {% endif %}
+
+    {% endif %}
+
+
+</div>
+
+</body>
+
+</html>
