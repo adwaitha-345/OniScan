@@ -3,157 +3,71 @@ import numpy as np
 
 
 def detect_layers(image):
-
     if image is None:
         return 0, image
 
-    # Resize
+    # =========================================================
+    # 1. PREPARE IMAGE & NORMALIZE
+    # =========================================================
     image = cv2.resize(image, (600, 600))
     result = image.copy()
-
-    # Grayscale
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-    # Smooth image
-    gray = cv2.GaussianBlur(gray, (7, 7), 0)
-
-    h, w = gray.shape
-
-    # -----------------------------------------
-    # Assume the cut onion is approximately
-    # around the center of the image
-    # -----------------------------------------
-
-    cx = w // 2
-    cy = h // 2
-
-    # -----------------------------------------
-    # Build radial intensity profile
-    # -----------------------------------------
-
-    max_radius = min(cx, cy) - 20
-
-    radii = np.arange(10, max_radius)
-
-    profile = []
-
-    # Sample many directions around the onion
-    angles = np.linspace(0, 2 * np.pi, 360, endpoint=False)
-
-    for r in radii:
-
-        x = (cx + r * np.cos(angles)).astype(np.int32)
-        y = (cy + r * np.sin(angles)).astype(np.int32)
-
-        values = gray[y, x]
-
-        # Median reduces effect of noise
-        profile.append(np.median(values))
-
-    profile = np.array(profile, dtype=np.float32)
-
-    # -----------------------------------------
-    # Smooth profile
-    # -----------------------------------------
-
-    profile = cv2.GaussianBlur(
-        profile.reshape(-1, 1),
-        (1, 11),
-        0
-    ).flatten()
-
-    # -----------------------------------------
-    # Find changes between onion rings
-    # -----------------------------------------
-
-    gradient = np.abs(np.gradient(profile))
-
-    # Smooth gradient
-    gradient = cv2.GaussianBlur(
-        gradient.reshape(-1, 1),
-        (1, 7),
-        0
-    ).flatten()
-
-    # -----------------------------------------
-    # MUCH LOWER threshold
-    # -----------------------------------------
-
-    threshold = np.mean(gradient) + 0.70 * np.std(gradient)
-
-    candidates = []
-
-    for i in range(2, len(gradient) - 2):
-
-        if gradient[i] > threshold:
-
-            if (
-                gradient[i] >= gradient[i - 1]
-                and gradient[i] >= gradient[i + 1]
-            ):
-                candidates.append(i)
-
-    # -----------------------------------------
-    # Remove detections that are too close
-    # -----------------------------------------
-
-    detected_radii = []
-
-    minimum_spacing = 18
-
-    for index in candidates:
-
-        radius = int(radii[index])
-
-        if radius < 15:
-            continue
-
-        if not detected_radii:
-            detected_radii.append(radius)
-
-        elif radius - detected_radii[-1] >= minimum_spacing:
-            detected_radii.append(radius)
-
-    # -----------------------------------------
-    # Limit to reasonable number
-    # -----------------------------------------
-
-    detected_radii = detected_radii[:8]
-
-    layer_count = len(detected_radii)
-
-    # -----------------------------------------
-    # Draw detected layers
-    # -----------------------------------------
-
-    for radius in detected_radii:
-
-        cv2.circle(
-            result,
-            (cx, cy),
-            radius,
-            (0, 255, 0),
-            2
-        )
-
-    # Draw center
-    cv2.circle(
-        result,
-        (cx, cy),
-        5,
-        (0, 0, 255),
-        -1
+    # =========================================================
+    # 2. ROBUST CONTRAST ENHANCEMENT & DENOISING
+    # =========================================================
+    # Bilateral filter keeps layer edges crisp while smoothing texture
+    filtered = cv2.bilateralFilter(gray, 9, 75, 75)
+    
+    # Adaptive thresholding handles shadows, uneven lighting, and variable skin colors
+    thresh = cv2.adaptiveThreshold(
+        filtered, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
+        cv2.THRESH_BINARY_INV, 19, 5
     )
 
-    # Show count
-    cv2.putText(
-        result,
-        f"Layers: {layer_count}",
-        (20, 40),
-        cv2.FONT_HERSHEY_SIMPLEX,
-        1,
-        (0, 0, 255),
-        2
+    # Clean up small salt-and-pepper noise
+    kernel = np.ones((3, 3), np.uint8)
+    opened = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel, iterations=1)
+
+    # =========================================================
+    # 3. NESTED CONTOUR HIERARCHY ANALYSIS
+    # (Handles organic, elliptical, or off-center onion structures 
+    # much better than rigid radial spokes)
+    # =========================================================
+    contours, hierarchy = cv2.findContours(
+        opened, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE
     )
+
+    layer_count = 0
+    if hierarchy is not None:
+        hierarchy = hierarchy[0]
+        valid_contours = []
+
+        for i, cnt in enumerate(contours):
+            area = cv2.contourArea(cnt)
+            # Filter out tiny noise and full-frame background boundaries
+            if 150 < area < 100000:
+                perimeter = cv2.arcLength(cnt, True)
+                if perimeter > 0:
+                    # Check circularity / elongation to ensure it's a ring-like structure
+                    circularity = 4 * np.pi * (area / (perimeter * perimeter))
+                    if circularity > 0.10: 
+                        valid_contours.append((i, area))
+
+        # Sort valid contours by containment depth or nesting level using hierarchy
+        # A true onion layer is nested inside outer rings.
+        nested_layers = 0
+        for i, area in valid_contours:
+            # Check if contour has a parent (meaning it's nested inside another ring)
+            parent_idx = hierarchy[i][3]
+            if parent_idx != -1:
+                nested_layers += 1
+
+        # Fallback to total valid rings if hierarchy tree is sparse
+        layer_count = max(nested_layers, len(valid_contours))
+        # Cap to a realistic biological maximum
+        layer_count = min(layer_count, 15)
+
+    
 
     return layer_count, result

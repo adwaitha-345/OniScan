@@ -56,6 +56,37 @@
             margin-top: 20px;
             border-radius: 10px;
         }
+        .file-upload {
+            margin: 20px 0;
+        }
+
+        .file-upload input[type="file"] {
+            display: none;
+        }
+
+        .file-label {
+            display: inline-block;
+            background: #6b3f75;
+            color: white;
+            padding: 14px 28px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .file-label:hover {
+            background: #4e2d57;
+            transform: translateY(-2px);
+        }
+
+        #fileName {
+            display: block;
+            margin-top: 10px;
+            color: #666;
+            font-size: 14px;
+        }
 
     </style>
 
@@ -73,26 +104,31 @@
     </p>
 
 
-    <form
-        method="POST"
-        enctype="multipart/form-data"
-    >
+    <form method="POST" enctype="multipart/form-data">
 
-        <input
-            type="file"
-            name="image"
-            accept="image/*"
-            required
-        >
+        <div class="file-upload">
+            <label for="imageInput" class="file-label">
+                🧅 Choose Onion Image
+            </label>
 
-        <br>
+            <input 
+                type="file" 
+                id="imageInput"
+                name="image" 
+                accept="image/*" 
+                required
+            >
 
-        <button type="submit">
-            Detect Layers
-        </button>
+            <span id="fileName">
+                {% if request.method == "POST" and request.files.get("image") %}
+                    {{ request.files.get("image").filename }}
+                {% else %}
+                    No image selected
+                {% endif %}
+            </span>
+        </div>
 
     </form>
-
 
     {% if layer_count is not none %}
 
@@ -114,7 +150,21 @@
 
 
 </div>
+<script>
+    document.getElementById("imageInput").addEventListener("change", function () {
 
+        const fileName = this.files.length
+            ? this.files[0].name
+            : "No image selected";
+
+        document.getElementById("fileName").textContent = fileName;
+
+        if (this.files.length) {
+            this.form.submit();
+        }
+
+    });
+</script>
 </body>
 
 </html>
