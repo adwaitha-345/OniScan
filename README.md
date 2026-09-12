@@ -58,8 +58,7 @@ Savalagirigiri/
 │
 ├── static/
 │   ├── image.png
-│   ├── onion.png
-│   └── uploads/
+│   └── onion.png
 │
 └── venv/
 ```
