@@ -1,91 +1,418 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Onion Layer Detector</title>
+    <title>OniScan</title>
 
     <style>
 
-        body {
-            font-family: Arial, sans-serif;
-            background: #f5f1f7;
-            text-align: center;
-            padding: 40px;
+        * {
+            box-sizing: border-box;
         }
+
+        body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+
+    /* Small repeated onion doodles */
+    background-color: #e8fffb;
+    background-image: url("/static/image.png");
+    background-size: 280px auto;
+    background-position: center;
+    background-repeat: repeat;
+    background-attachment: fixed;
+
+    min-height: 100vh;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: 40px 20px;
+}
+
 
         .container {
-            max-width: 700px;
-            margin: auto;
-            background: white;
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-        }
+    width: 100%;
+    max-width: 800px;
+
+    position: relative;
+    overflow: hidden;
+
+    background: #ffffff;
+
+    border-radius: 28px;
+
+    padding: 45px;
+
+    box-shadow:
+        0 20px 60px rgba(91, 48, 91, 0.18),
+        0 4px 15px rgba(100, 70, 100, 0.08);
+
+    border: 1px solid rgba(150, 66, 116, 0.15);
+
+    text-align: center;
+}
 
         h1 {
-            font-size: 36px;
+    font-size: 42px;
+
+    margin-top: 0;
+    margin-bottom: 8px;
+
+    color: #7d3568;
+
+    font-weight: 700;
+}
+.onion {
+    width: 112px;
+    height: 112px;
+    object-fit: contain;
+    object-position: center;
+    vertical-align: middle;
+    margin-right: 5px;
+}
+
+
+        .subtitle {
+            color: #666;
+
+            margin-bottom: 35px;
         }
 
-        input {
-            margin: 20px;
+
+        /* =========================
+           UPLOAD BOX
+           ========================= */
+
+        .upload-box {
+    border: 2px dashed rgba(139, 70, 130, 0.35);
+
+    border-radius: 20px;
+
+    padding: 40px 25px;
+
+    margin-bottom: 25px;
+
+    background: rgba(255, 255, 255, 0.45);
+
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+
+    box-shadow:
+        inset 0 0 25px rgba(150, 66, 116, 0.04);
+}
+
+
+        .upload-box h3 {
+            margin-top: 0;
+
+            margin-bottom: 25px;
         }
 
-        button {
-            background: #6b3f75;
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
+
+        /* =========================
+           CAMERA
+           ========================= */
+
+        .camera-container {
+            display: none;
+
+            margin-bottom: 20px;
         }
 
-        button:hover {
-            background: #4e2d57;
+
+        #video {
+            width: 100%;
+
+            max-width: 600px;
+
+            border-radius: 15px;
+
+            background: black;
+
+            display: block;
+
+            margin: 0 auto;
         }
 
-        .result {
-            margin-top: 30px;
-            font-size: 28px;
-            font-weight: bold;
-        }
 
-        img {
-            max-width: 100%;
-            margin-top: 20px;
-            border-radius: 10px;
-        }
-        .file-upload {
-            margin: 20px 0;
-        }
-
-        .file-upload input[type="file"] {
+        #canvas {
             display: none;
         }
 
-        .file-label {
-            display: inline-block;
-            background: #6b3f75;
-            color: white;
-            padding: 14px 28px;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
+
+        .camera-controls {
+            margin-top: 15px;
+
+            display: flex;
+
+            justify-content: center;
+
+            gap: 12px;
+
+            flex-wrap: wrap;
         }
 
-        .file-label:hover {
-            background: #4e2d57;
-            transform: translateY(-2px);
+
+        /* =========================
+           BUTTONS
+           ========================= */
+
+        button,
+        .button-label {
+
+            border: none;
+
+            padding: 14px 25px;
+
+            border-radius: 10px;
+
+            font-size: 16px;
+
+            cursor: pointer;
+
+            color: white;
+
+            display: inline-block;
         }
+
+
+        .camera-button {
+    background: #914477;
+    box-shadow: 0 5px 12px rgba(145, 68, 119, 0.25);
+}
+
+.capture-button {
+    background: #914477;
+    box-shadow: 0 5px 12px rgba(145, 68, 119, 0.25);
+}
+
+        .close-camera-button {
+            background: #777;
+        }
+
+
+        .gallery-button {
+            background: #555;
+        }
+
+
+        button:hover,
+.button-label:hover {
+    opacity: 1;
+    transform: translateY(-2px);
+}
+
+button,
+.button-label {
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        opacity 0.2s ease;
+}
+
+        /* Hide file input */
+
+        #fileInput {
+            display: none;
+        }
+
+
+        /* =========================
+           PREVIEW
+           ========================= */
+
+        .preview-container {
+            display: none;
+
+            margin-top: 20px;
+        }
+
+
+        #preview {
+            max-width: 100%;
+
+            max-height: 450px;
+
+            border-radius: 15px;
+
+            display: block;
+
+            margin: 0 auto;
+        }
+
 
         #fileName {
-            display: block;
-            margin-top: 10px;
             color: #666;
+
             font-size: 14px;
+
+            margin: 12px 0;
+        }
+
+
+        /* =========================
+           LOADING
+           ========================= */
+
+        .loading {
+            display: none;
+
+            margin-top: 20px;
+
+            color: #7b4b94;
+
+            font-weight: bold;
+
+            font-size: 16px;
+        }
+
+
+        /* =========================
+           ERROR
+           ========================= */
+
+        .error {
+            color: #b00020;
+
+            margin-top: 20px;
+        }
+
+
+        /* =========================
+           RESULT
+           ========================= */
+
+        .result {
+    margin-top: 35px;
+
+    padding: 25px;
+
+    background:
+        linear-gradient(
+            rgba(255, 255, 255, 0.72),
+            rgba(249, 240, 249, 0.72)
+        ),
+        url("/static/image.png");
+
+    background-size:
+        100% 100%,
+        180px auto;
+
+    background-position:
+        center,
+        center;
+
+    background-repeat:
+        no-repeat,
+        repeat;
+
+    border-radius: 20px;
+
+    border: 1px solid rgba(145, 68, 119, 0.10);
+
+    box-shadow:
+        inset 0 0 25px rgba(145, 68, 119, 0.05);
+}
+        .result h2 {
+    font-size: 32px;
+
+    margin: 5px;
+
+    color: #7d3568;
+}
+
+
+        .result img {
+    max-width: 100%;
+    height: auto;
+
+    margin-top: 20px;
+
+    border-radius: 14px;
+
+    box-shadow:
+        0 8px 25px rgba(90, 50, 90, 0.12);
+}
+
+
+        /* =========================
+           MOBILE
+           ========================= */
+
+        @media (max-width: 600px) {
+
+            body {
+                padding: 12px;
+
+                align-items: flex-start;
+            }
+
+
+            .container {
+                margin-top: 15px;
+
+                padding: 28px 18px;
+
+                border-radius: 18px;
+            }
+
+
+            h1 {
+                font-size: 32px;
+            }
+
+
+            .subtitle {
+                font-size: 14px;
+
+                margin-bottom: 25px;
+            }
+
+
+            .upload-box {
+                padding: 28px 15px;
+            }
+
+
+            .upload-box h3 {
+                font-size: 18px;
+            }
+
+
+            button,
+            .button-label {
+                width: 100%;
+
+                padding: 15px;
+            }
+
+
+            .camera-controls {
+                flex-direction: column;
+            }
+
+
+            #video {
+                max-height: 400px;
+
+                object-fit: cover;
+            }
+
+
+            .result {
+                padding: 18px;
+            }
+
+
+            .result h2 {
+                font-size: 25px;
+            }
+
         }
 
     </style>
@@ -95,76 +422,672 @@
 
 <body>
 
+
 <div class="container">
 
-    <h1>🧅 Onion Layer Detector</h1>
 
-    <p>
-        Upload a half-cut onion image
+    <h1>
+    <img src="/static/onion.png" class="onion" alt="Onion">
+    Savalagirigiri
+</h1>
+    
+
+    <p class="subtitle">
+        Onion Layer Detection Using Computer Vision
     </p>
 
 
-    <form method="POST" enctype="multipart/form-data">
+    <!-- =========================
+         FORM
+         ========================= -->
 
-        <div class="file-upload">
-            <label for="imageInput" class="file-label">
-                🧅 Choose Onion Image
-            </label>
+    <form
+        method="POST"
+        enctype="multipart/form-data"
+        id="uploadForm"
+    >
 
-            <input 
-                type="file" 
-                id="imageInput"
-                name="image" 
-                accept="image/*" 
-                required
+
+        <div class="upload-box">
+
+
+            <h3>
+                Capture or upload a half-cut onion image
+            </h3>
+
+
+            <!-- =========================
+                 CAMERA AREA
+                 ========================= -->
+
+            <div
+                class="camera-container"
+                id="cameraContainer"
             >
 
-            <span id="fileName">
-                {% if request.method == "POST" and request.files.get("image") %}
-                    {{ request.files.get("image").filename }}
-                {% else %}
-                    No image selected
-                {% endif %}
-            </span>
+
+                <video
+                    id="video"
+                    autoplay
+                    playsinline
+                ></video>
+
+
+                <div class="camera-controls">
+
+
+                    <button
+                        type="button"
+                        class="capture-button"
+                        id="captureButton"
+                    >
+                        📸 Capture Photo
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="close-camera-button"
+                        id="closeCameraButton"
+                    >
+                        ✕ Close Camera
+                    </button>
+
+
+                </div>
+
+
+            </div>
+
+
+            <!-- =========================
+                 CAMERA + GALLERY BUTTONS
+                 ========================= -->
+
+            <div
+                class="camera-controls"
+                id="mainButtons"
+            >
+
+
+                <button
+                    type="button"
+                    class="camera-button"
+                    id="openCameraButton"
+                >
+                    📷 Open Camera
+                </button>
+
+
+                <label
+                    for="fileInput"
+                    class="button-label gallery-button"
+                >
+                    📁 Choose Image
+                </label>
+
+
+            </div>
+
+
+            <!-- =========================
+                 FILE INPUT
+                 ========================= -->
+
+            <input
+                type="file"
+                id="fileInput"
+                name="image"
+                accept="image/*"
+            >
+
+
+            <!-- =========================
+                 PREVIEW
+                 ========================= -->
+
+            <div
+                class="preview-container"
+                id="previewContainer"
+            >
+
+                <img
+                    id="preview"
+                    alt="Selected onion"
+                >
+
+            </div>
+
+
+            <p id="fileName">
+                No image selected
+            </p>
+
+
+            <!-- =========================
+                 LOADING
+                 ========================= -->
+
+            <div
+                class="loading"
+                id="loading"
+            >
+                🔍 Detecting onion layers...
+            </div>
+
+
         </div>
+
 
     </form>
 
-    {% if layer_count is not none %}
+
+    <!-- =========================
+         ERROR
+         ========================= -->
+
+    {% if error %}
+
+        <div class="error">
+            {{ error }}
+        </div>
+
+    {% endif %}
+
+
+    <!-- =========================
+         RESULT
+         ========================= -->
+
+    {% if count is not none %}
 
         <div class="result">
 
-            🧅 Layers Detected:
-            {{ layer_count }}
+
+            <h2>
+                🧅 {{ count }} Layers Detected
+            </h2>
+
+
+            {% if image %}
+
+                <img
+                    src="{{ image }}"
+                    alt="Detected onion layers"
+                >
+
+            {% endif %}
+
 
         </div>
-
-
-        {% if result_image %}
-
-            <img src="{{ result_image }}">
-
-        {% endif %}
 
     {% endif %}
 
 
 </div>
+
+
+<!-- Hidden canvas -->
+
+<canvas id="canvas"></canvas>
+
+
 <script>
-    document.getElementById("imageInput").addEventListener("change", function () {
 
-        const fileName = this.files.length
-            ? this.files[0].name
-            : "No image selected";
 
-        document.getElementById("fileName").textContent = fileName;
+    /* =========================
+       ELEMENTS
+       ========================= */
 
-        if (this.files.length) {
-            this.form.submit();
+    const uploadForm =
+        document.getElementById("uploadForm");
+
+
+    const openCameraButton =
+        document.getElementById("openCameraButton");
+
+
+    const closeCameraButton =
+        document.getElementById("closeCameraButton");
+
+
+    const captureButton =
+        document.getElementById("captureButton");
+
+
+    const cameraContainer =
+        document.getElementById("cameraContainer");
+
+
+    const mainButtons =
+        document.getElementById("mainButtons");
+
+
+    const video =
+        document.getElementById("video");
+
+
+    const canvas =
+        document.getElementById("canvas");
+
+
+    const fileInput =
+        document.getElementById("fileInput");
+
+
+    const preview =
+        document.getElementById("preview");
+
+
+    const previewContainer =
+        document.getElementById("previewContainer");
+
+
+    const fileName =
+        document.getElementById("fileName");
+
+
+    const loading =
+        document.getElementById("loading");
+
+
+    let cameraStream = null;
+
+
+
+    /* =========================
+       OPEN CAMERA
+       ========================= */
+
+    openCameraButton.addEventListener(
+        "click",
+        async function () {
+
+            try {
+
+                /*
+                 * Request camera.
+                 *
+                 * On phone:
+                 * use rear camera when available.
+                 *
+                 * On laptop:
+                 * use webcam.
+                 */
+
+                cameraStream =
+                    await navigator.mediaDevices.getUserMedia({
+
+                        video: {
+
+                            facingMode: {
+                                ideal: "environment"
+                            }
+
+                        },
+
+                        audio: false
+
+                    });
+
+
+                video.srcObject =
+                    cameraStream;
+
+
+                cameraContainer.style.display =
+                    "block";
+
+
+                mainButtons.style.display =
+                    "none";
+
+
+                previewContainer.style.display =
+                    "none";
+
+
+                fileName.textContent =
+                    "Camera is active";
+
+
+            }
+
+
+            catch (error) {
+
+                console.error(
+                    "Camera error:",
+                    error
+                );
+
+
+                alert(
+                    "Could not access the camera. " +
+                    "Please allow camera permission " +
+                    "or use Choose Image."
+                );
+
+            }
+
+        }
+    );
+
+
+
+    /* =========================
+       CAPTURE PHOTO
+       ========================= */
+
+    captureButton.addEventListener(
+        "click",
+        function () {
+
+
+            if (!cameraStream) {
+                return;
+            }
+
+
+            const width =
+                video.videoWidth;
+
+
+            const height =
+                video.videoHeight;
+
+
+            if (!width || !height) {
+
+                alert(
+                    "Camera is not ready yet. " +
+                    "Please wait a moment and try again."
+                );
+
+                return;
+
+            }
+
+
+            canvas.width =
+                width;
+
+
+            canvas.height =
+                height;
+
+
+            const context =
+                canvas.getContext("2d");
+
+
+            context.drawImage(
+                video,
+                0,
+                0,
+                width,
+                height
+            );
+
+
+            canvas.toBlob(
+                function (blob) {
+
+
+                    if (!blob) {
+
+                        alert(
+                            "Could not capture the photo."
+                        );
+
+                        return;
+
+                    }
+
+
+                    /*
+                     * Convert captured image
+                     * into a File object.
+                     */
+
+                    const file =
+                        new File(
+                            [blob],
+                            "camera_onion.jpg",
+                            {
+                                type: "image/jpeg"
+                            }
+                        );
+
+
+                    /*
+                     * Put captured image
+                     * into the form's file input.
+                     */
+
+                    const dataTransfer =
+                        new DataTransfer();
+
+
+                    dataTransfer.items.add(file);
+
+
+                    fileInput.files =
+                        dataTransfer.files;
+
+
+                    /*
+                     * Show preview.
+                     */
+
+                    preview.src =
+                        URL.createObjectURL(blob);
+
+
+                    previewContainer.style.display =
+                        "block";
+
+
+                    fileName.textContent =
+                        "Photo captured";
+
+
+                    /*
+                     * Stop camera.
+                     */
+
+                    stopCamera();
+
+
+                    /*
+                     * Automatically submit.
+                     *
+                     * THIS is the teammate's
+                     * requested functionality.
+                     */
+
+                    showLoading();
+
+
+                    uploadForm.submit();
+
+
+                },
+
+                "image/jpeg",
+
+                0.95
+
+            );
+
+        }
+    );
+
+
+
+    /* =========================
+       CLOSE CAMERA
+       ========================= */
+
+    closeCameraButton.addEventListener(
+        "click",
+        function () {
+
+
+            stopCamera();
+
+
+            cameraContainer.style.display =
+                "none";
+
+
+            mainButtons.style.display =
+                "flex";
+
+
+            fileName.textContent =
+                "No image selected";
+
+
+        }
+    );
+
+
+
+    /* =========================
+       STOP CAMERA
+       ========================= */
+
+    function stopCamera() {
+
+
+        if (cameraStream) {
+
+
+            cameraStream
+                .getTracks()
+                .forEach(
+                    function (track) {
+
+                        track.stop();
+
+                    }
+                );
+
+
+            cameraStream = null;
+
         }
 
-    });
+
+        video.srcObject = null;
+
+    }
+
+
+
+    /* =========================
+       GALLERY / FILE UPLOAD
+       ========================= */
+
+    fileInput.addEventListener(
+        "change",
+        function () {
+
+
+            if (this.files.length === 0) {
+                return;
+            }
+
+
+            const file =
+                this.files[0];
+
+
+            /*
+             * Stop camera if running.
+             */
+
+            stopCamera();
+
+
+            cameraContainer.style.display =
+                "none";
+
+
+            mainButtons.style.display =
+                "flex";
+
+
+            /*
+             * Show selected image.
+             */
+
+            preview.src =
+                URL.createObjectURL(file);
+
+
+            previewContainer.style.display =
+                "block";
+
+
+            fileName.textContent =
+                "Selected: " + file.name;
+
+
+            /*
+             * Automatically detect.
+             */
+
+            showLoading();
+
+
+            uploadForm.submit();
+
+        }
+    );
+
+
+
+    /* =========================
+       LOADING
+       ========================= */
+
+    function showLoading() {
+
+        loading.style.display =
+            "block";
+
+
+        /*
+         * Prevent another submission
+         * while detection is running.
+         */
+
+        openCameraButton.disabled =
+            true;
+
+    }
+
+
+
+    /* =========================
+       CLEANUP
+       ========================= */
+
+    window.addEventListener(
+        "beforeunload",
+        function () {
+
+            stopCamera();
+
+        }
+    );
+
+
 </script>
+
+
 </body>
 
 </html>
