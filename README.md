@@ -62,6 +62,8 @@ Savalagirigiri/
 │   └── uploads/
 │
 └── venv/
+```
+
 ## Implementation
 
 The application follows this pipeline:
@@ -92,3 +94,5 @@ Analyze Visible Onion Layers
 Return Layer Count
   ↓
 Display Result
+```
+
